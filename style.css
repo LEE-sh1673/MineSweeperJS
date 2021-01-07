@@ -1,0 +1,109 @@
+@import "reset.css";
+
+body {
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  font-size: 120%;
+}
+
+.grid {
+  width: 75vmin;
+  height: 75vmin;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+  /* display: flex; */
+  /* flex-wrap: wrap; */
+  background-color: #c0c0c0;
+  border: solid #808080;
+  border-width: 1px 0 0 1px;
+}
+
+.gameOver {
+  position: fixed;
+  width: 75vmin;
+  height: 75vmin;
+  background-color: #000;
+  color: red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s, opacity 0.5s linear;
+}
+
+.gameOver h1 {
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+.w10_h10 {
+  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.w5_h5 {
+  grid-template-rows: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid div {
+  box-sizing: border-box;
+  border: 4px outset #ececec;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid div:active {
+  border: solid #999;
+  border-width: 2px 0 0 2px;
+}
+
+.grid div.checked {
+  border: 1px solid #808080;
+}
+
+.grid div.bomb {
+  background-color: inherit;
+}
+
+.grid div.bomb-on {
+  background-color: red;
+  border: 1px solid #808080;
+}
+
+.grid div.score_1 {
+  color: blue;
+}
+.grid div.score_2 {
+  color: green;
+}
+.grid div.score_3 {
+  color: red;
+}
+
+@media screen and (min-width: 300px) and (max-width: 500px) {
+  body {
+    align-items: end;
+  }
+  .grid {
+    width: 100vmin;
+    height: 100vmin;
+  }
+  .gameOver {
+    width: 100vmin;
+    height: 100vmin;
+  }
+}
