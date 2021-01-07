@@ -1,12 +1,34 @@
+const ANGRY_FACE = "👿";
+const HAPPY_FACE = "🙂";
+const item__smile = document.getElementById("item__smilely");
+const item__numsFlag = document.getElementById("item__numsFlag");
+const item__timer = document.getElementById("item__timer");
+const ctrl__normalBtn = document.getElementById("pickBtn");
+const ctrl__flagBtn = document.getElementById("flagBtn");
+
+let isMobile = false;
+let timer = false;
+let count = 0;
+let touchMode = 0;
+
+function pad(num) {
+  return ("00" + num).slice(-3);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.querySelector(".grid");
-  const gameOverScreen = document.querySelector(".gameOver");
   let width = 10;
   let bombAmount = 20;
   let flags = 0;
   let squares = [];
   let isGameOver = false;
   let totalSquares = width * width;
+
+  if (window.innerWidth <= 500) {
+    isMobile = true;
+    ctrl__flagBtn.classList.remove("btn__active");
+    ctrl__normalBtn.classList.add("btn__active");
+  }
 
   //* set board size and determine amount of bombs.
   switch (width) {
@@ -35,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a[0] - b[0])
       .map((a) => a[1]);
 
+    item__numsFlag.innerHTML = pad(bombAmount, 3);
+    item__timer.innerHTML = "000";
+
     for (let i = 0; i < width * width; i++) {
       const square = document.createElement("div");
       square.setAttribute("id", i);
@@ -42,16 +67,38 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.appendChild(square);
       squares.push(square);
 
-      //* normal click
-      square.addEventListener("click", (event) => {
-        handleSquareClick(square);
-      });
+      if (!isMobile) {
+        //* normal click
+        square.addEventListener("click", (event) => {
+          handleSquareClick(square);
+        });
 
-      //* ctrl and right click
-      square.oncontextmenu = (event) => {
-        event.preventDefault();
-        addFlag(square);
-      };
+        //* ctrl and right click
+        square.oncontextmenu = (event) => {
+          event.preventDefault();
+          addFlag(square);
+        };
+      } else {
+        ctrl__flagBtn.addEventListener("click", (event) => {
+          touchMode = event.path[1].value;
+          ctrl__flagBtn.classList.add("btn__active");
+          ctrl__normalBtn.classList.remove("btn__active");
+        });
+
+        ctrl__normalBtn.addEventListener("click", (event) => {
+          touchMode = event.path[1].value;
+          ctrl__flagBtn.classList.remove("btn__active");
+          ctrl__normalBtn.classList.add("btn__active");
+        });
+
+        square.addEventListener("click", () => {
+          if (touchMode === "flag") {
+            addFlag(square);
+          } else {
+            handleSquareClick(square);
+          }
+        });
+      }
     }
 
     //* add numbers.
@@ -120,6 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
           case 3:
             squares[i].classList.add("score_3");
             break;
+          case 4:
+            squares[i].classList.add("score_4");
+            break;
+          case 4:
+            squares[i].classList.add("score_5");
+            break;
         }
       }
     }
@@ -130,6 +183,18 @@ document.addEventListener("DOMContentLoaded", () => {
   //* add flag with right click
   function addFlag(square) {
     if (isGameOver) {
+      return;
+    }
+    if (flags === bombAmount) {
+      if (
+        !square.classList.contains("checked") &&
+        square.classList.contains("flag")
+      ) {
+        square.classList.remove("flag");
+        square.innerHTML = "";
+        flags--;
+        item__numsFlag.innerHTML = pad(bombAmount - flags, 3);
+      }
       return;
     }
     if (!square.classList.contains("checked") && flags < bombAmount) {
@@ -143,6 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
         square.innerHTML = "";
         flags--;
       }
+      item__numsFlag.innerHTML = pad(bombAmount - flags, 3);
     }
   }
 
@@ -159,9 +225,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     if (square.classList.contains("bomb")) {
-      gameOver(square);
+      gameOver();
     } else {
       let total = square.getAttribute("data");
+      timer = true;
 
       if (total != 0) {
         square.classList.add("checked");
@@ -223,9 +290,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   //* game over
-  function gameOver(square) {
+  function gameOver() {
     console.log("BOOM! GAME OVER!!");
     isGameOver = true;
+    timer = false;
+    item__smile.innerHTML = ANGRY_FACE;
 
     // show all of the bombs in grid.
     squares.forEach((square) => {
@@ -234,14 +303,11 @@ document.addEventListener("DOMContentLoaded", () => {
         square.innerHTML = "💣";
       }
     });
-    gameOverScreen.style.visibility = "visible";
-    gameOverScreen.style.opacity = "1";
   }
 
   //* check for win
   function checkForWin() {
     let matches = 0;
-
     for (let i = 0; i < squares.length; i++) {
       if (
         squares[i].classList.contains("flag") &&
@@ -255,4 +321,30 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+
+  //* restart the game
+  function restartGame() {
+    grid.innerHTML = "";
+    squares = [];
+    isGameOver = false;
+    timer = false;
+    flags = 0;
+    count = 0;
+    if (isMobile) {
+      touchMode = "normal";
+      ctrl__flagBtn.classList.remove("btn__active");
+      ctrl__normalBtn.classList.add("btn__active");
+    }
+    item__smile.innerHTML = HAPPY_FACE;
+    createBoard();
+  }
+
+  item__smile.addEventListener("click", restartGame);
 });
+
+setInterval(() => {
+  if (timer) {
+    item__timer.innerHTML = ("00" + count).slice(-3);
+    count++;
+  }
+}, 1000);

@@ -7,10 +7,31 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="gameStatus-wrapper">
+      <ul class="gameStatus__toolList">
+        <li class="toolList__item" id="item__numsFlag">000</li>
+        <li class="toolList__item" id="item__smilely">🙂</li>
+        <li class="toolList__item item__active" id="item__timer">000</li>
+      </ul>
+    </div>
     <div class="grid"></div>
-    <div class="gameOver">
-      <h1>Game Over</h1>
-      <p>Press [F5] to restart the game.</p>
+
+    <div class="mobile__tools">
+      <button class="tool__btn" id="pickBtn" value="normal">
+        <p>🙂</p>
+        <p class="btn__description">Normal click</p>
+      </button>
+      <button class="tool__btn" id="flagBtn" value="flag">
+        <p>⛳</p>
+        <p class="btn__description">Flag click</p>
+      </button>
+    </div>
+    <div class="mobile__description">
+      <p>
+        <b>NOTE:</b><br />
+        깃발을 누르고 싶다면 오른쪽 버튼을 클릭하고, 일반 모드로 전환하고 싶다면
+        왼쪽 버튼을 클릭해주세요!
+      </p>
     </div>
     <script src="app.js" defer type="module" charset="utf-8"></script>
   </body>
