@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     case 10:
       grid.classList.remove("w5_h5");
       grid.classList.add("w10_h10");
-      bombAmount = 1;
+      bombAmount = 20;
       break;
     case 5:
       grid.classList.add("w5_h5");
