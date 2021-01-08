@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
         square.classList.remove("flag");
         square.innerHTML = "";
         flags--;
-        updatePanel(itemNumsFlag, bombAmount);
+        updatePanel(itemNumsFlag, bombAmount - flags);
       }
       return;
     }
