@@ -1,10 +1,12 @@
 const ANGRY_FACE = "👿";
 const HAPPY_FACE = "🙂";
+const VICTORY_FACE = "😲";
 const item__smile = document.getElementById("item__smilely");
 const item__numsFlag = document.getElementById("item__numsFlag");
 const item__timer = document.getElementById("item__timer");
 const ctrl__normalBtn = document.getElementById("pickBtn");
 const ctrl__flagBtn = document.getElementById("flagBtn");
+const mobile__gameStatus = document.querySelector(".mobile__gameStatus");
 
 let isMobile = false;
 let timer = false;
@@ -15,6 +17,29 @@ function pad(num) {
   return ("00" + num).slice(-3);
 }
 
+function showGameStatus(message, color = "inherit") {
+  mobile__gameStatus.innerHTML = message;
+  mobile__gameStatus.style.color = color;
+}
+
+if (window.innerWidth <= 500) {
+  isMobile = true;
+  ctrl__flagBtn.classList.remove("btn__active");
+  ctrl__normalBtn.classList.add("btn__active");
+
+  ctrl__normalBtn.addEventListener("click", () => {
+    touchMode = 0;
+    ctrl__flagBtn.classList.remove("btn__active");
+    ctrl__normalBtn.classList.add("btn__active");
+  });
+
+  ctrl__flagBtn.addEventListener("click", () => {
+    touchMode = 1;
+    ctrl__flagBtn.classList.add("btn__active");
+    ctrl__normalBtn.classList.remove("btn__active");
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.querySelector(".grid");
   let width = 10;
@@ -23,12 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let squares = [];
   let isGameOver = false;
   let totalSquares = width * width;
-
-  if (window.innerWidth <= 500) {
-    isMobile = true;
-    ctrl__flagBtn.classList.remove("btn__active");
-    ctrl__normalBtn.classList.add("btn__active");
-  }
 
   //* set board size and determine amount of bombs.
   switch (width) {
@@ -79,20 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
           addFlag(square);
         };
       } else {
-        ctrl__flagBtn.addEventListener("click", (event) => {
-          touchMode = event.path[1].value;
-          ctrl__flagBtn.classList.add("btn__active");
-          ctrl__normalBtn.classList.remove("btn__active");
-        });
-
-        ctrl__normalBtn.addEventListener("click", (event) => {
-          touchMode = event.path[1].value;
-          ctrl__flagBtn.classList.remove("btn__active");
-          ctrl__normalBtn.classList.add("btn__active");
-        });
-
         square.addEventListener("click", () => {
-          if (touchMode === "flag") {
+          if (touchMode === 1) {
             addFlag(square);
           } else {
             handleSquareClick(square);
@@ -291,9 +298,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //* game over
   function gameOver() {
-    console.log("BOOM! GAME OVER!!");
+    showGameStatus("다시 시작하시려면 상단의 이모콘을 클릭해주세요.", "red");
     isGameOver = true;
     timer = false;
+    flags = 999;
     item__smile.innerHTML = ANGRY_FACE;
 
     // show all of the bombs in grid.
@@ -316,8 +324,15 @@ document.addEventListener("DOMContentLoaded", () => {
         matches++;
       }
       if (matches === bombAmount) {
-        console.log("YOU WIN");
+        showGameStatus(
+          `축하합니다! 게임을 클리어 하셨습니다! 모든 지뢰를 찾는데 걸린 시간은 ${
+            count - 1
+          }초 입니다.`,
+          "red"
+        );
         isGameOver = true;
+        timer = false;
+        item__smile.innerHTML = VICTORY_FACE;
       }
     }
   }
@@ -336,6 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctrl__normalBtn.classList.add("btn__active");
     }
     item__smile.innerHTML = HAPPY_FACE;
+    showGameStatus("");
     createBoard();
   }
 
