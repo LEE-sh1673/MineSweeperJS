@@ -12,6 +12,7 @@ let isMobile = false;
 let timer = false;
 let count = 0;
 let touchMode = 0;
+let isFirstClick = true;
 
 function pad(num) {
   return ("00" + num).slice(-3);
@@ -63,51 +64,8 @@ document.addEventListener("DOMContentLoaded", () => {
       break;
   }
 
-  //* create board.
-  function createBoard() {
-    //* get shuffled game array with random bombs.
-    const bombsArray = Array(bombAmount).fill("bomb"); // 20 positions of value is 'bomb'.
-    const emptyArray = Array(width * width - bombAmount).fill("valid"); // 80 positions of value is 'valid'.
-    const gameArray = emptyArray.concat(bombsArray);
-
-    //* shuffle the array (using es6 syntaxies.)
-    const shuffledArray = gameArray
-      .map((a) => [Math.random(), a])
-      .sort((a, b) => a[0] - b[0])
-      .map((a) => a[1]);
-
-    item__numsFlag.innerHTML = pad(bombAmount, 3);
-    item__timer.innerHTML = "000";
-
-    for (let i = 0; i < width * width; i++) {
-      const square = document.createElement("div");
-      square.setAttribute("id", i);
-      square.classList.add(shuffledArray[i]);
-      grid.appendChild(square);
-      squares.push(square);
-
-      if (!isMobile) {
-        //* normal click
-        square.addEventListener("click", (event) => {
-          handleSquareClick(square);
-        });
-
-        //* ctrl and right click
-        square.oncontextmenu = (event) => {
-          event.preventDefault();
-          addFlag(square);
-        };
-      } else {
-        square.addEventListener("click", () => {
-          if (touchMode === 1) {
-            addFlag(square);
-          } else {
-            handleSquareClick(square);
-          }
-        });
-      }
-    }
-
+  //* add numbers in squares
+  function initSquares() {
     //* add numbers.
     for (let i = 0; i < squares.length; i++) {
       let total = 0;
@@ -166,23 +124,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
         switch (total) {
           case 1:
-            squares[i].classList.add("score_1");
+            squares[i].style.color = "blue";
             break;
           case 2:
-            squares[i].classList.add("score_2");
+            squares[i].style.color = "green";
             break;
           case 3:
-            squares[i].classList.add("score_3");
+            squares[i].style.color = "red";
             break;
           case 4:
-            squares[i].classList.add("score_4");
+            squares[i].style.color = "purple";
             break;
-          case 4:
-            squares[i].classList.add("score_5");
+          case 5:
+            squares[i].style.color = "brown";
             break;
         }
       }
     }
+  }
+
+  //* handle first click event
+  function handleFirstClick(square) {
+    //* select random position to switch the value with first position.
+    let swapIdx = Math.floor(Math.random() * squares.length);
+
+    while (
+      swapIdx == square.id ||
+      squares[swapIdx].classList.contains("bomb")
+    ) {
+      swapIdx = Math.floor(Math.random() * squares.length);
+    }
+
+    console.log(squares[swapIdx]);
+    square.classList.remove("bomb");
+    for (let i = 0; i < squares[swapIdx].classList.length; i++) {
+      const currentItem = squares[swapIdx].classList.item(i);
+      square.classList.add(currentItem);
+      squares[swapIdx].classList.remove(currentItem);
+    }
+    square.setAttribute("data", squares[swapIdx].getAttribute("data"));
+    squares[swapIdx].classList.add("bomb");
+    squares[swapIdx].removeAttribute("data");
+
+    console.log(`Swap positions ==> ${square.id} and ${squares[swapIdx].id}`);
+    initSquares();
+  }
+
+  //* create board.
+  function createBoard() {
+    //* get shuffled game array with random bombs.
+    const bombsArray = Array(bombAmount).fill("bomb"); // 20 positions of value is 'bomb'.
+    const emptyArray = Array(width * width - bombAmount).fill("valid"); // 80 positions of value is 'valid'.
+    let gameArray = emptyArray.concat(bombsArray);
+
+    //* shuffle the array (using es6 syntaxies.)
+    let shuffledArray = gameArray
+      .map((a) => [Math.random(), a])
+      .sort((a, b) => a[0] - b[0])
+      .map((a) => a[1]);
+
+    item__numsFlag.innerHTML = pad(bombAmount, 3);
+    item__timer.innerHTML = "000";
+
+    for (let i = 0; i < width * width; i++) {
+      const square = document.createElement("div");
+      square.setAttribute("id", i);
+      square.classList.add(shuffledArray[i]);
+      grid.appendChild(square);
+      squares.push(square);
+
+      if (!isMobile) {
+        //* normal click
+        square.addEventListener("click", (event) => {
+          if (isFirstClick) {
+            isFirstClick = false;
+            if (square.classList.contains("bomb")) {
+              handleFirstClick(square);
+            }
+          }
+          handleSquareClick(square);
+        });
+
+        //* ctrl and right click
+        square.oncontextmenu = (event) => {
+          event.preventDefault();
+          addFlag(square);
+        };
+      } else {
+        square.addEventListener("click", () => {
+          if (touchMode === 1) {
+            addFlag(square);
+          } else {
+            if (isFirstClick) {
+              isFirstClick = false;
+              if (square.classList.contains("bomb")) {
+                handleFirstClick(square);
+              }
+            }
+            handleSquareClick(square);
+          }
+        });
+      }
+    }
+    initSquares();
   }
 
   createBoard();
@@ -222,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //* click on square actions.
   function handleSquareClick(square) {
     let currentId = square.id;
+
     if (isGameOver) {
       return;
     }
@@ -342,6 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.innerHTML = "";
     squares = [];
     isGameOver = false;
+    isFirstClick = true;
     timer = false;
     flags = 0;
     count = 0;
