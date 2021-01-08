@@ -1,58 +1,80 @@
 import { saveScore, loadScore } from "./score.js";
 
+// emojis for graphics.
 const ANGRY_FACE = "👿";
 const HAPPY_FACE = "🙂";
 const VICTORY_FACE = "😲";
-const item__smile = document.getElementById("item__smilely");
-const item__numsFlag = document.getElementById("item__numsFlag");
-const item__timer = document.getElementById("item__timer");
-const ctrl__normalBtn = document.getElementById("pickBtn");
-const ctrl__flagBtn = document.getElementById("flagBtn");
-const mobile__gameStatus = document.querySelector(".mobile__gameStatus");
-const mobile__highScore = document.querySelector(".mobile__highScore");
+const BOMB_ICON = "💥";
+const FLAG_ICON = "🚩";
 
-let isMobile = false;
-let timer = false;
-let count = 0;
-let touchMode = 0;
+// header elements.
+const itemSmile = document.getElementById("item__smilely");
+const itemNumsFlag = document.getElementById("item__numsFlag");
+const itemTimer = document.getElementById("item__timer");
+
+// mobile ui elements.
+const normalPickBtn = document.getElementById("pickBtn");
+const flagPickBtn = document.getElementById("flagBtn");
+const gameStatus = document.querySelector(".mobile__gameStatus");
+const highScore = document.querySelector(".mobile__highScore");
+
 let isFirstClick = true;
 
-function pad(num) {
-  return ("00" + num).slice(-3);
+// for count time.
+let timer = false;
+let count = 0;
+
+// this support to mobile
+let isMobile = false;
+let touchMode = 0; //* [0]: normal click / [1]: flag click
+
+// update header panel '001... 002... 999' forms.
+function updatePanel(panel, num) {
+  panel.innerHTML = ("00" + num).slice(-3);
 }
 
-function showGameStatus(message, color = "inherit") {
-  mobile__gameStatus.innerHTML = message;
-  mobile__gameStatus.style.color = color;
+// display some message when gameover or win.
+function showGameStatus(message = "", color = "inherit") {
+  gameStatus.innerHTML = message;
+  gameStatus.style.color = color;
 }
 
+setInterval(() => {
+  if (timer) {
+    updatePanel(itemTimer, count);
+    count++;
+  }
+}, 1000);
+
+// support mobile version (under 500px layout.)
 if (window.innerWidth <= 500) {
   isMobile = true;
-  mobile__highScore.innerHTML = loadScore() + " sec";
-  ctrl__flagBtn.classList.remove("btn__active");
-  ctrl__normalBtn.classList.add("btn__active");
+  highScore.innerHTML = loadScore() + " sec";
+  flagPickBtn.classList.remove("btn__active");
+  normalPickBtn.classList.add("btn__active");
 
-  ctrl__normalBtn.addEventListener("click", () => {
+  normalPickBtn.addEventListener("click", () => {
     touchMode = 0;
-    ctrl__flagBtn.classList.remove("btn__active");
-    ctrl__normalBtn.classList.add("btn__active");
+    flagPickBtn.classList.remove("btn__active");
+    normalPickBtn.classList.add("btn__active");
   });
 
-  ctrl__flagBtn.addEventListener("click", () => {
+  flagPickBtn.addEventListener("click", () => {
     touchMode = 1;
-    ctrl__flagBtn.classList.add("btn__active");
-    ctrl__normalBtn.classList.remove("btn__active");
+    flagPickBtn.classList.add("btn__active");
+    normalPickBtn.classList.remove("btn__active");
   });
 }
 
+// when web page is loaded, create game board and set the variable.
 document.addEventListener("DOMContentLoaded", () => {
-  const grid = document.querySelector(".grid");
-  let width = 10;
-  let bombAmount = 20;
-  let flags = 0;
-  let squares = [];
+  const grid = document.querySelector(".grid"); // grid element
+  let width = 10; // grid height (N)
+  let totalSquares = width * width; // total grid size (N * N)
+  let bombAmount = 20; // number of bombs in grid.
+  let flags = 0; // number of current flags in grid.
+  let squares = []; // each cells in grid
   let isGameOver = false;
-  let totalSquares = width * width;
 
   //* set board size and determine amount of bombs.
   switch (width) {
@@ -70,12 +92,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //* add numbers in squares
   function initSquares() {
-    //* add numbers.
     for (let i = 0; i < squares.length; i++) {
       let total = 0;
       const isLeftEdge = i % width == 0;
       const isRightEdge = i % width === width - 1;
 
+      //*  check neighboring squares.
       if (squares[i].classList.contains("valid")) {
         if (i > 0 && !isLeftEdge && squares[i - 1].classList.contains("bomb")) {
           total++;
@@ -159,7 +181,6 @@ document.addEventListener("DOMContentLoaded", () => {
       swapIdx = Math.floor(Math.random() * squares.length);
     }
 
-    console.log(squares[swapIdx]);
     square.classList.remove("bomb");
     for (let i = 0; i < squares[swapIdx].classList.length; i++) {
       const currentItem = squares[swapIdx].classList.item(i);
@@ -169,8 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     square.setAttribute("data", squares[swapIdx].getAttribute("data"));
     squares[swapIdx].classList.add("bomb");
     squares[swapIdx].removeAttribute("data");
-
-    console.log(`Swap positions ==> ${square.id} and ${squares[swapIdx].id}`);
     initSquares();
   }
 
@@ -187,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a[0] - b[0])
       .map((a) => a[1]);
 
-    item__numsFlag.innerHTML = pad(bombAmount, 3);
-    item__timer.innerHTML = "000";
+    updatePanel(itemNumsFlag, bombAmount);
+    itemTimer.innerHTML = "000";
 
     for (let i = 0; i < width * width; i++) {
       const square = document.createElement("div");
@@ -248,14 +267,14 @@ document.addEventListener("DOMContentLoaded", () => {
         square.classList.remove("flag");
         square.innerHTML = "";
         flags--;
-        item__numsFlag.innerHTML = pad(bombAmount - flags, 3);
+        updatePanel(itemNumsFlag, bombAmount);
       }
       return;
     }
     if (!square.classList.contains("checked") && flags < bombAmount) {
       if (!square.classList.contains("flag")) {
         square.classList.add("flag");
-        square.innerHTML = "⛳";
+        square.innerHTML = FLAG_ICON;
         flags++;
         checkForWin();
       } else {
@@ -263,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
         square.innerHTML = "";
         flags--;
       }
-      item__numsFlag.innerHTML = pad(bombAmount - flags, 3);
+      updatePanel(itemNumsFlag, bombAmount - flags);
     }
   }
 
@@ -296,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     square.classList.add("checked");
   }
 
-  //* check neighboring squares once square is clicked.
+  //* check neighboring squares once square is clicked. (use recursion.)
   function checkSquare(square, currentId) {
     const isLeftEdge = currentId % width === 0;
     const isRightEdge = currentId % width === width - 1;
@@ -351,13 +370,13 @@ document.addEventListener("DOMContentLoaded", () => {
     isGameOver = true;
     timer = false;
     flags = 999;
-    item__smile.innerHTML = ANGRY_FACE;
+    itemSmile.innerHTML = ANGRY_FACE;
 
     // show all of the bombs in grid.
     squares.forEach((square) => {
       if (square.classList.contains("bomb")) {
         square.classList.add("bomb-on");
-        square.innerHTML = "💣";
+        square.innerHTML = BOMB_ICON;
       }
     });
   }
@@ -382,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         saveScore(count - 1);
         isGameOver = true;
         timer = false;
-        item__smile.innerHTML = VICTORY_FACE;
+        itemSmile.innerHTML = VICTORY_FACE;
       }
     }
   }
@@ -398,21 +417,14 @@ document.addEventListener("DOMContentLoaded", () => {
     count = 0;
     if (isMobile) {
       touchMode = "normal";
-      ctrl__flagBtn.classList.remove("btn__active");
-      ctrl__normalBtn.classList.add("btn__active");
-      mobile__highScore.innerHTML = loadScore() + " sec";
+      flagPickBtn.classList.remove("btn__active");
+      normalPickBtn.classList.add("btn__active");
+      highScore.innerHTML = loadScore() + " sec";
     }
-    item__smile.innerHTML = HAPPY_FACE;
-    showGameStatus("");
+    itemSmile.innerHTML = HAPPY_FACE;
+    showGameStatus();
     createBoard();
   }
 
-  item__smile.addEventListener("click", restartGame);
+  itemSmile.addEventListener("click", restartGame);
 });
-
-setInterval(() => {
-  if (timer) {
-    item__timer.innerHTML = ("00" + count).slice(-3);
-    count++;
-  }
-}, 1000);
