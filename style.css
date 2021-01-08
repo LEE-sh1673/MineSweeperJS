@@ -163,18 +163,15 @@ li#item__smilely:active {
   position: relative;
   box-sizing: border-box;
   width: 100vmin;
-  height: 30vmin;
+  height: 20vmin;
   display: none;
   justify-content: center;
   align-items: center;
   padding: 2vmin 4vmin;
   font-size: 14px;
+  font-weight: bold;
   line-height: 1.5;
   color: #2c2c2c;
-}
-
-.mobile__gameStatus {
-  font-weight: bold;
 }
 
 @media screen and (min-width: 300px) and (max-width: 500px) {
