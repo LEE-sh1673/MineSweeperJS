@@ -165,6 +165,7 @@ li#item__smilely:active {
   width: 100vmin;
   height: 20vmin;
   display: none;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 2vmin 4vmin;
@@ -172,6 +173,10 @@ li#item__smilely:active {
   font-weight: bold;
   line-height: 1.5;
   color: #2c2c2c;
+}
+
+.mobile__highScore {
+  color: #4cd963;
 }
 
 @media screen and (min-width: 300px) and (max-width: 500px) {

@@ -1,3 +1,5 @@
+import { saveScore, loadScore } from "./score.js";
+
 const ANGRY_FACE = "👿";
 const HAPPY_FACE = "🙂";
 const VICTORY_FACE = "😲";
@@ -7,6 +9,7 @@ const item__timer = document.getElementById("item__timer");
 const ctrl__normalBtn = document.getElementById("pickBtn");
 const ctrl__flagBtn = document.getElementById("flagBtn");
 const mobile__gameStatus = document.querySelector(".mobile__gameStatus");
+const mobile__highScore = document.querySelector(".mobile__highScore");
 
 let isMobile = false;
 let timer = false;
@@ -25,6 +28,7 @@ function showGameStatus(message, color = "inherit") {
 
 if (window.innerWidth <= 500) {
   isMobile = true;
+  mobile__highScore.innerHTML = loadScore() + " sec";
   ctrl__flagBtn.classList.remove("btn__active");
   ctrl__normalBtn.classList.add("btn__active");
 
@@ -55,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     case 10:
       grid.classList.remove("w5_h5");
       grid.classList.add("w10_h10");
-      bombAmount = 20;
+      bombAmount = 1;
       break;
     case 5:
       grid.classList.add("w5_h5");
@@ -375,6 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }초 입니다.`,
           "red"
         );
+        saveScore(count - 1);
         isGameOver = true;
         timer = false;
         item__smile.innerHTML = VICTORY_FACE;
@@ -395,6 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
       touchMode = "normal";
       ctrl__flagBtn.classList.remove("btn__active");
       ctrl__normalBtn.classList.add("btn__active");
+      mobile__highScore.innerHTML = loadScore() + " sec";
     }
     item__smile.innerHTML = HAPPY_FACE;
     showGameStatus("");
